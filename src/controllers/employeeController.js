@@ -41,6 +41,34 @@ exports.create = async (req, res) => {
     restHelper.sendResponse(res);
 };
 
+// get employee list for given restaurants and data 
+exports.getEmployeeList = async (req, res) => {
+    restHelper.message = "Failed to get employee details"
+    try {
+        let data = await queryObj.getEmployeeList(Employee, req.query, paginationLimit)
+        if (Object.entries(data).length > 0) {
+            restHelper.status = 'Success';
+            restHelper.code = 200;
+            restHelper.message = 'Successfully fetched employee list.';
+            restHelper.responseData = data;
+        } else {
+            restHelper.status = 'Success';
+            restHelper.code = 204;
+            restHelper.message = 'No data.';
+            restHelper.responseData = data;
+        }
+
+    } catch (err) {
+        if (err.kind && err.kind === 'ObjectId') {
+            restHelper.message = "employee not found with id " + req.params.id;
+            restHelper.code = 204;
+        } else {
+            restHelper.message = "Error retrieving employee with id " + req.params.id;
+        }
+    }
+    restHelper.sendResponse(res);
+};
+
 /**
  * Returns the validation errors for input.
  *
