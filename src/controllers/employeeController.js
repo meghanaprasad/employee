@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
     restHelper.sendResponse(res);
 };
 
-// get employee list for given restaurants and data 
+// get employee list 
 exports.getEmployeeList = async (req, res) => {
     restHelper.message = "Failed to get employee details"
     try {
@@ -69,6 +69,44 @@ exports.getEmployeeList = async (req, res) => {
     restHelper.sendResponse(res);
 };
 
+// delete employee 
+exports.deleteEmployee = async (req, res) => {
+    restHelper.message = "Failed to delete employee details"
+    restHelper.responseData = {};
+    try {
+        let empData = await queryObj.getEntryById(Employee, req.params.id)
+        let deletedData = await queryObj.deleteEntry(Employee, req.params.id)
+        if(empData.employee_id && empData.employee_id == 125){
+            // updated a emp var
+            const empDetails = {
+                reports_to:124
+            };
+            let updatedData = await queryObj.updateEntry(Employee,empDetails)
+            //console.log(empData);
+        }
+        
+        if (deletedData || updatedData) {
+            restHelper.status = 'Success';
+            restHelper.code = 200;
+            restHelper.message = 'Successfully deleted employee.';
+        } else {
+            restHelper.status = 'Success';
+            restHelper.code = 204;
+            restHelper.message = 'No data.';
+        }
+
+    } catch (err) {
+        console.log(err)
+        if (err.kind && err.kind === 'ObjectId') {
+            restHelper.message = "employee not found with id " + req.params.id;
+            restHelper.code = 204;
+        } else {
+            restHelper.message = "Error retrieving employee with id " + req.params.id;
+        }
+    }
+    restHelper.sendResponse(res);
+};
+
 /**
  * Returns the validation errors for input.
  *
@@ -82,12 +120,6 @@ exports.validate = (val) => {
                 check('employee_id').not().isEmpty().trim().escape().isInt().withMessage('please enter the valid employeeid'),
                 check('name').not().isEmpty().trim().escape().isLength({ min: 3, max: 150 }).withMessage('please enter valid name'),
 				check('reports_to').exists().trim().escape().isInt().withMessage('please enter the valid data for reports_to'),
-            ]
-        };
-        case 'updateOrder': {
-            return [
-                check('customerid').not().isEmpty().trim().escape().isInt().withMessage('please enter the valid customerid'),
-                check('restaurant_id').exists().trim().escape().isLength({ min: 3, max: 150 }).withMessage('please enter valid restaurant_id'),
             ]
         }
     }
